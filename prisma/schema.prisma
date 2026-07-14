@@ -11,3 +11,26 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Tenant {
+  id                    Int       @id @default(autoincrement())
+  apiKey                String    @unique
+  name                  String
+  plan_id               Int       @unique
+  plans                 Plans     @relation(fields: [planId], references: [id])
+  subscription_status   String    @default("inactive")
+  stripeCustomerId      String?   @unique
+  stripeSubscriptionId  String?
+  createdAt             DateTime  @default(now())
+  usageEvents           UsageEvent[]
+  subscriptions         Subscription[]
+}
+
+model Plan {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
+  monthlyPrice Int      
+  apiLimit     Int
+  tokenLimit   Int
+  tenants      Tenant[]
+}
