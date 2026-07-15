@@ -16,9 +16,9 @@ model Tenant {
   id                    Int       @id @default(autoincrement())
   apiKey                String    @unique
   name                  String
-  plan_id               Int       @unique
-  plans                 Plans     @relation(fields: [planId], references: [id])
-  subscription_status   String    @default("inactive")
+  planId                Int
+  plan                  Plan      @relation(fields: [planId], references: [id])
+  subscriptionStatus    String    @default("inactive")
   stripeCustomerId      String?   @unique
   stripeSubscriptionId  String?
   createdAt             DateTime  @default(now())
@@ -29,8 +29,37 @@ model Tenant {
 model Plan {
   id           Int      @id @default(autoincrement())
   name         String   @unique
-  monthlyPrice Int      
+  monthlyPrice Int
   apiLimit     Int
   tokenLimit   Int
   tenants      Tenant[]
+}
+
+model UsageEvent {
+  id              Int     @id @default(autoincrement())
+  tenantId        Int
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  usageType       String
+  quantity        Int
+  idempotencyKey  String
+  createdAt       DateTime @default(now())
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, createdAt])
+}
+
+model Subscription {
+  id                   Int      @id @default(autoincrement())
+  tenantId             Int
+  tenant               Tenant   @relation(fields: [tenantId], references: [id])
+  stripeSubscriptionId String   @unique
+  status               String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model ProcessedWebhook {
+  id            Int      @id @default(autoincrement())
+  stripeEventId String   @unique
+  processedAt   DateTime @default(now())
 }
