@@ -13,4 +13,16 @@ describe("calculateCost", () => {
   it("rounds to cents", () => {
     expect(calculateCost({ apiCalls: 1, tokens: 1 })).toBe(0);
   });
+
+  it("prices API calls alone", () => {
+    expect(calculateCost({ apiCalls: 1_000, tokens: 0 })).toBe(1);
+  });
+
+  it("prices tokens alone", () => {
+    expect(calculateCost({ apiCalls: 0, tokens: 100_000 })).toBe(2);
+  });
+
+  it("prices a full Pro-plan month", () => {
+    expect(calculateCost({ apiCalls: 100_000, tokens: 10_000_000 })).toBe(300);
+  });
 });
